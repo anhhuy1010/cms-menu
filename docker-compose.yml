@@ -1,0 +1,13 @@
+version: "2"
+services:
+  app:
+    container_name: cms-menu
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile-dev
+    volumes:
+      - ./:/go/src/github.com/anhhuy1010/cms-menu
+    ports:
+      - 8088:8018
+      - 5018:5018
+
