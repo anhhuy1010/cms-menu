@@ -45,8 +45,8 @@ func (productClt ProductController) List(c *gin.Context) {
 		cond["quantity"] = bson.M{"$gte": req.MaxQuantity}
 	}
 	if req.Date != nil {
-		cond["start_date"] = bson.M{"$gte": req.Date}
-		cond["end_date"] = bson.M{"$lte": req.Date}
+		cond["start_date"] = bson.M{"$lte": req.Date}
+		cond["end_date"] = bson.M{"$gte": req.Date}
 	}
 	optionsQuery, page, limit := models.GetPagingOption(req.Page, req.Limit, req.Sort)
 	var respData []request.ListResponse
