@@ -1,19 +1,16 @@
 package controllers
 
 import (
-	// "fmt"
 	"fmt"
 	"math"
 	"net/http"
 
-	// "github.com/anhhuy1010/cms-menu/constant"
 	"github.com/anhhuy1010/cms-menu/constant"
 	"github.com/anhhuy1010/cms-menu/helpers/respond"
 	"github.com/anhhuy1010/cms-menu/helpers/util"
 
-	// "github.com/anhhuy1010/cms-menu/helpers/util"
 	"github.com/anhhuy1010/cms-menu/models"
-	request "github.com/anhhuy1010/cms-menu/request/user"
+	request "github.com/anhhuy1010/cms-menu/request/products"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"go.mongodb.org/mongo-driver/bson"
@@ -22,12 +19,10 @@ import (
 type ProductController struct {
 }
 
-// khởi tạo hàm get List
+// Function Get List
 func (productClt ProductController) List(c *gin.Context) {
-	productModel := new(models.Product)
+	productModel := new(models.Products)
 	var req request.GetListRequest
-
-	// kiểm tra đầu vào
 	err := c.ShouldBindWith(&req, binding.Query)
 	if err != nil {
 		_ = c.Error(err)
@@ -41,17 +36,19 @@ func (productClt ProductController) List(c *gin.Context) {
 	if req.IsActive != nil {
 		cond["is_active"] = req.IsActive
 	}
-	if req.Quantity != nil {
-		cond["quantity"] = bson.M{"$gt": req.Quantity}
-	}
-	if req.Quantity != nil {
-		cond["quantity"] = bson.M{"$lt": req.Quantity}
+
+	if req.MaxQuantity != nil && req.MinQuantity != nil {
+		cond["quantity"] = bson.M{"$gt": req.MinQuantity, "$lt": req.MaxQuantity}
+	} else if req.MinQuantity != nil {
+		cond["quantity"] = bson.M{"$lt": req.MinQuantity}
+	} else if req.MaxQuantity != nil {
+		cond["quantity"] = bson.M{"$gt": req.MaxQuantity}
 	}
 	if req.StartDate != nil {
-		cond["start_date"] = req.StartDate
+		cond["start_date"] = bson.M{"$gte": req.StartDate}
 	}
 	if req.EndDate != nil {
-		cond["end_date"] = req.EndDate
+		cond["end_date"] = bson.M{"$lte": req.StartDate}
 	}
 	optionsQuery, page, limit := models.GetPagingOption(req.Page, req.Limit, req.Sort)
 	var respData []request.ListResponse
@@ -60,13 +57,15 @@ func (productClt ProductController) List(c *gin.Context) {
 	for _, productt := range productt {
 
 		res := request.ListResponse{
-			Uuid:       productt.Uuid,
-			Name:       productt.Name,
-			Price:      productt.Price,
-			ClientUuid: productt.ClientUuid,
-			IsActive:   productt.IsActive,
-			Image:      productt.Image,
-			Sequence:   productt.Sequence,
+			Uuid:      productt.Uuid,
+			Name:      productt.Name,
+			Image:     productt.Image,
+			Price:     productt.Price,
+			IsActive:  productt.IsActive,
+			Sequence:  productt.Sequence,
+			StartDate: productt.StartDate,
+			EndDate:   productt.EndDate,
+			Quantity:  productt.Quantity,
 		}
 		respData = append(respData, res)
 	}
@@ -80,9 +79,10 @@ func (productClt ProductController) List(c *gin.Context) {
 	c.JSON(http.StatusOK, respond.SuccessPagination(respData, page, limit, pages, total))
 }
 
-// hàm get detail list
+// Function Get Detail
+
 func (productClt ProductController) Detail(c *gin.Context) {
-	productModel := new(models.Product)
+	productModel := new(models.Products)
 	var reqUri request.GetDetailUri
 	err := c.ShouldBindUri(&reqUri)
 	if err != nil {
@@ -95,21 +95,29 @@ func (productClt ProductController) Detail(c *gin.Context) {
 	productt, err := productModel.FindOne(condition)
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.ErrorCommon("User no found!"))
+		c.JSON(http.StatusOK, respond.ErrorCommon("Product no found!"))
 		return
 	}
 
 	response := request.GetDetailResponse{
-		Name:  productt.Name,
-		Image: productt.Image,
-		Price: productt.Price,
+		Uuid:        productt.Uuid,
+		Price:       productt.Price,
+		Image:       productt.Image,
+		Name:        productt.Name,
+		Sequence:    productt.Sequence,
+		Quantity:    productt.Quantity,
+		Description: productt.Description,
+		Gallery:     productt.Gallery,
+		IsActive:    productt.IsActive,
+		StartDate:   productt.StartDate,
+		EndDate:     productt.EndDate,
 	}
 	c.JSON(http.StatusOK, respond.Success(response, "Successfully"))
 }
 
-// hàm update list
-func (productClt ProductController) Update(c *gin.Context) {
-	productModel := new(models.Product)
+// Function Update Status
+func (productClt ProductController) UpdateStatus(c *gin.Context) {
+	productModel := new(models.Products)
 	var reqUri request.UpdateUri
 
 	err := c.ShouldBindUri(&reqUri)
@@ -133,12 +141,7 @@ func (productClt ProductController) Update(c *gin.Context) {
 		c.JSON(http.StatusOK, respond.ErrorCommon("Product no found!"))
 		return
 	}
-	if req.IsActive != nil {
-		productt.IsActive = *req.IsActive
-	}
-	if req.IsDelete != nil {
-		productt.IsDelete = *req.IsDelete
-	}
+	productt.IsActive = *req.IsActive
 
 	_, err = productt.Update()
 	if err != nil {
@@ -149,9 +152,9 @@ func (productClt ProductController) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, respond.Success(productt.IsActive, "update successfully"))
 }
 
-// hàm delete list
+// Function Delete
 func (productClt ProductController) Delete(c *gin.Context) {
-	productModel := new(models.Product)
+	productModel := new(models.Products)
 	var reqUri request.DeleteUri
 	err := c.ShouldBindUri(&reqUri)
 	if err != nil {
@@ -161,25 +164,25 @@ func (productClt ProductController) Delete(c *gin.Context) {
 	}
 
 	condition := bson.M{"uuid": reqUri.Uuid}
-	user, err := productModel.FindOne(condition)
+	productt, err := productModel.FindOne(condition)
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.ErrorCommon("User no found!"))
+		c.JSON(http.StatusOK, respond.ErrorCommon("Product no found!"))
 		return
 	}
 
-	user.IsDelete = constant.DELETE
+	productt.IsDelete = constant.DELETE
 
-	_, err = user.Update()
+	_, err = productt.Update()
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusOK, respond.UpdatedFail())
 		return
 	}
-	c.JSON(http.StatusOK, respond.Success(user.Uuid, "Delete successfully"))
+	c.JSON(http.StatusOK, respond.Success(productt.Uuid, "Delete successfully"))
 }
 
-// hàm create list
+// Function Create
 func (productClt ProductController) Create(c *gin.Context) {
 	var req request.GetInsertRequest
 	err := c.ShouldBindWith(&req, binding.Query)
@@ -194,7 +197,7 @@ func (productClt ProductController) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, respond.MissingParams())
 		return
 	}
-	productData := models.Product{}
+	productData := models.Products{}
 	productData.Uuid = util.GenerateUUID()
 	productData.Name = req.Name
 	productData.Image = req.Image
@@ -204,51 +207,20 @@ func (productClt ProductController) Create(c *gin.Context) {
 	productData.Sequence = req.Sequence
 	productData.StartDate = req.StartDate
 	productData.EndDate = req.EndDate
-	_, err = productData.Insert()
-	if err != nil {
-		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.UpdatedFail())
-		return
-	}
-	c.JSON(http.StatusOK, respond.Success(productData.Uuid, "update successfully"))
-}
-
-// hàm create detail
-func (productClt ProductController) CreateDetail(c *gin.Context) {
-	var req request.GetCreateRequest
-	err := c.ShouldBindWith(&req, binding.Query)
-	if err != nil {
-		_ = c.Error(err)
-		c.JSON(http.StatusBadRequest, respond.MissingParams())
-		return
-	}
-	err = c.ShouldBindJSON(&req)
-	if err != nil {
-		_ = c.Error(err)
-		c.JSON(http.StatusBadRequest, respond.MissingParams())
-		return
-	}
-	productData := models.Product{}
-	productData.Uuid = util.GenerateUUID()
-	productData.Name = req.Name
-	productData.Image = req.Image
-	productData.IsActive = req.IsActive
-	productData.Price = req.Price
-	productData.Quantity = req.Quantity
-	productData.Sequence = req.Sequence
-	productData.Description = req.Description
 	productData.Gallery = req.Gallery
+	productData.Description = req.Description
 	_, err = productData.Insert()
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusOK, respond.UpdatedFail())
 		return
 	}
-	c.JSON(http.StatusOK, respond.Success(productData.Uuid, "update successfully"))
+	c.JSON(http.StatusOK, respond.Success(productData.Uuid, "Successfully"))
 }
 
-func (productClt ProductController) UpdateDetail(c *gin.Context) {
-	productModel := new(models.Product)
+// Function Update
+func (productClt ProductController) Update(c *gin.Context) {
+	productModel := new(models.Products)
 	var reqUri request.UpdateUriDetail
 	err := c.ShouldBindUri(&reqUri)
 	if err != nil {
@@ -268,14 +240,11 @@ func (productClt ProductController) UpdateDetail(c *gin.Context) {
 	productt, err := productModel.FindOne(condition)
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.ErrorCommon("User no found!"))
+		c.JSON(http.StatusOK, respond.ErrorCommon("Product no found!"))
 		return
 	}
 	if req.IsActive != nil {
 		productt.IsActive = *req.IsActive
-	}
-	if req.IsDelete != nil {
-		productt.IsDelete = *req.IsDelete
 	}
 	if req.Name != "" {
 		productt.Name = req.Name
@@ -309,5 +278,5 @@ func (productClt ProductController) UpdateDetail(c *gin.Context) {
 		c.JSON(http.StatusOK, respond.UpdatedFail())
 		return
 	}
-	c.JSON(http.StatusOK, respond.Success(productt.IsActive, "update successfully"))
+	c.JSON(http.StatusOK, respond.Success(productt.Uuid, "Update successfully"))
 }

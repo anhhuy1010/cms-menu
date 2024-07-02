@@ -5,7 +5,8 @@ type (
 		Uuid string `uri:"uuid"`
 	}
 	UpdateRequest struct {
-		IsDelete *int `json:"is_delete"`
-		IsActive *int `json:"is_active"`
+		Name     string `json:"name"`
+		UserName string `json:"username"`
+		Email    string `json:"email"`
 	}
 )
