@@ -38,17 +38,15 @@ func (productClt ProductController) List(c *gin.Context) {
 	}
 
 	if req.MaxQuantity != nil && req.MinQuantity != nil {
-		cond["quantity"] = bson.M{"$gt": req.MinQuantity, "$lt": req.MaxQuantity}
+		cond["quantity"] = bson.M{"$gte": req.MinQuantity, "$lte": req.MaxQuantity}
 	} else if req.MinQuantity != nil {
-		cond["quantity"] = bson.M{"$lt": req.MinQuantity}
+		cond["quantity"] = bson.M{"$lte": req.MinQuantity}
 	} else if req.MaxQuantity != nil {
-		cond["quantity"] = bson.M{"$gt": req.MaxQuantity}
+		cond["quantity"] = bson.M{"$gte": req.MaxQuantity}
 	}
-	if req.StartDate != nil {
-		cond["start_date"] = bson.M{"$gte": req.StartDate}
-	}
-	if req.EndDate != nil {
-		cond["end_date"] = bson.M{"$lte": req.StartDate}
+	if req.Date != nil {
+		cond["start_date"] = bson.M{"$gte": req.Date}
+		cond["end_date"] = bson.M{"$lte": req.Date}
 	}
 	optionsQuery, page, limit := models.GetPagingOption(req.Page, req.Limit, req.Sort)
 	var respData []request.ListResponse
@@ -149,7 +147,7 @@ func (productClt ProductController) UpdateStatus(c *gin.Context) {
 		c.JSON(http.StatusOK, respond.UpdatedFail())
 		return
 	}
-	c.JSON(http.StatusOK, respond.Success(productt.IsActive, "update successfully"))
+	c.JSON(http.StatusOK, respond.Success(productt.Uuid, "update successfully"))
 }
 
 // Function Delete
@@ -185,13 +183,7 @@ func (productClt ProductController) Delete(c *gin.Context) {
 // Function Create
 func (productClt ProductController) Create(c *gin.Context) {
 	var req request.GetInsertRequest
-	err := c.ShouldBindWith(&req, binding.Query)
-	if err != nil {
-		_ = c.Error(err)
-		c.JSON(http.StatusBadRequest, respond.MissingParams())
-		return
-	}
-	err = c.ShouldBindJSON(&req)
+	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		_ = c.Error(err)
 		c.JSON(http.StatusBadRequest, respond.MissingParams())
@@ -249,20 +241,20 @@ func (productClt ProductController) Update(c *gin.Context) {
 	if req.Name != "" {
 		productt.Name = req.Name
 	}
-	if req.Image != "" {
-		productt.Image = req.Image
+	if req.Image != nil {
+		productt.Image = *req.Image
 	}
-	if req.Description != "" {
-		productt.Description = req.Description
+	if req.Description != nil {
+		productt.Description = *req.Description
 	}
-	if req.Price != 0 {
-		productt.Price = req.Price
+	if req.Price != nil {
+		productt.Price = *req.Price
 	}
-	if req.Sequence != 0 {
-		productt.Sequence = req.Sequence
+	if req.Sequence != nil {
+		productt.Sequence = *req.Sequence
 	}
-	if req.Quantity != 0 {
-		productt.Quantity = req.Quantity
+	if req.Quantity != nil {
+		productt.Quantity = *req.Quantity
 	}
 	if req.StartDate != nil {
 		productt.StartDate = *req.StartDate

@@ -13,8 +13,7 @@ type (
 		Sequence    int        `form:"sequence"`
 		MinQuantity *int       `form:"min_quantity"`
 		MaxQuantity *int       `form:"max_quantity"`
-		StartDate   *time.Time `form:"start_date"`
-		EndDate     *time.Time `form:"end_date"`
+		Date        *time.Time `form:"date"`
 	}
 	ListResponse struct {
 		Uuid      string    `json:"uuid" `

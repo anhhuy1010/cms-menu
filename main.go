@@ -13,7 +13,7 @@ import (
 	"github.com/anhhuy1010/cms-menu/routes"
 	"github.com/anhhuy1010/cms-menu/services/logService"
 	"github.com/gin-gonic/gin"
-	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
