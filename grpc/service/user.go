@@ -25,7 +25,7 @@ func NewUserServer() pb.UserServer {
 func (s *UserService) List(ctx context.Context, req *pb.ListRequest) (*pb.ListResponse, error) {
 	conditions := bson.M{}
 
-	result, err := new(models.Users).Find(conditions)
+	result, err := new(models.Product).Find(conditions)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -34,7 +34,7 @@ func (s *UserService) List(ctx context.Context, req *pb.ListRequest) (*pb.ListRe
 
 		res := &pb.DetailResponse{
 			Uuid:     user.Uuid,
-			Username: user.Username,
+			Name:     user.Name,
 			IsActive: int32(user.IsActive),
 		}
 		respData = append(respData, res)

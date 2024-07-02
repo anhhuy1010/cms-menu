@@ -15,26 +15,30 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type Users struct {
-	ClientUuid string    `json:"client_uuid,omitempty" bson:"client_uuid"`
-	Uuid       string    `json:"uuid,omitempty" bson:"uuid"`
-	Name       string    `json:"name,omitempty" bson:"name"`
-	Email      string    `json:"email,omitempty" bson:"email"`
-	Username   string    `json:"username,omitempty" bson:"username"`
-	IsActive   int       `json:"is_active" bson:"is_active"`
-	IsDelete   int       `json:"is_delete" bson:"is_delete"`
-	CreatedAt  time.Time `json:"created_at" bson:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at" bson:"updated_at"`
-	CreatedBy  *string   `json:"created_by" bson:"created_by"`
-	UpdatedBy  *string   `json:"updated_by" bson:"updated_by"`
+type Product struct {
+	ClientUuid  string    `json:"client_uuid,omitempty" bson:"client_uuid"`
+	Uuid        string    `json:"uuid,omitempty" bson:"uuid"`
+	Price       int       `json:"price,omitempty" bson:"price"`
+	Image       string    `json:"image" bson:"image"`
+	Name        string    `json:"name,omitempty" bson:"name"`
+	IsActive    int       `json:"is_active" bson:"is_active"`
+	IsDelete    int       `json:"is_delete" bson:"is_delete"`
+	StartDate   time.Time `json:"start_date" bson:"start_date"`
+	EndDate     time.Time `json:"end_date" bson:"end_date  "`
+	CreatedAt   time.Time `json:"created_at" bson:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" bson:"updated_at"`
+	Sequence    int       `json:"sequence" bson:"sequence"`
+	Quantity    int       `json:"quantity" bson:"quantity"`
+	Description string    `json:"description" bson:"description"`
+	Gallery     []string  `json:"gallery" bson:"gallery"`
 }
 
-func (u *Users) Model() *mongo.Collection {
+func (u *Product) Model() *mongo.Collection {
 	db := database.GetInstance()
-	return db.Collection("users")
+	return db.Collection("product")
 }
 
-func (u *Users) Find(conditions map[string]interface{}, opts ...*options.FindOptions) ([]*Users, error) {
+func (u *Product) Find(conditions map[string]interface{}, opts ...*options.FindOptions) ([]*Product, error) {
 	coll := u.Model()
 
 	conditions["is_delete"] = constant.UNDELETE
@@ -43,15 +47,15 @@ func (u *Users) Find(conditions map[string]interface{}, opts ...*options.FindOpt
 		return nil, err
 	}
 
-	var users []*Users
+	var product []*Product
 	for cursor.Next(context.TODO()) {
-		var elem Users
+		var elem Product
 		err := cursor.Decode(&elem)
 		if err != nil {
 			return nil, err
 		}
 
-		users = append(users, &elem)
+		product = append(product, &elem)
 	}
 
 	if err := cursor.Err(); err != nil {
@@ -59,10 +63,10 @@ func (u *Users) Find(conditions map[string]interface{}, opts ...*options.FindOpt
 	}
 	_ = cursor.Close(context.TODO())
 
-	return users, nil
+	return product, nil
 }
 
-func (u *Users) Pagination(ctx context.Context, conditions map[string]interface{}, modelOptions ...ModelOption) ([]*Users, error) {
+func (u *Product) Pagination(ctx context.Context, conditions map[string]interface{}, modelOptions ...ModelOption) ([]*Product, error) {
 	coll := u.Model()
 
 	conditions["is_delete"] = constant.UNDELETE
@@ -74,9 +78,9 @@ func (u *Users) Pagination(ctx context.Context, conditions map[string]interface{
 		return nil, err
 	}
 
-	var users []*Users
+	var product []*Product
 	for cursor.Next(context.TODO()) {
-		var elem Users
+		var elem Product
 		err := cursor.Decode(&elem)
 		if err != nil {
 			log.Println("[Decode] PopularCuisine:", err)
@@ -84,7 +88,7 @@ func (u *Users) Pagination(ctx context.Context, conditions map[string]interface{
 			continue
 		}
 
-		users = append(users, &elem)
+		product = append(product, &elem)
 	}
 
 	if err := cursor.Err(); err != nil {
@@ -92,10 +96,10 @@ func (u *Users) Pagination(ctx context.Context, conditions map[string]interface{
 	}
 	_ = cursor.Close(context.TODO())
 
-	return users, nil
+	return product, nil
 }
 
-func (u *Users) Distinct(conditions map[string]interface{}, fieldName string, opts ...*options.DistinctOptions) ([]interface{}, error) {
+func (u *Product) Distinct(conditions map[string]interface{}, fieldName string, opts ...*options.DistinctOptions) ([]interface{}, error) {
 	coll := u.Model()
 
 	conditions["is_delete"] = constant.UNDELETE
@@ -108,7 +112,7 @@ func (u *Users) Distinct(conditions map[string]interface{}, fieldName string, op
 	return values, nil
 }
 
-func (u *Users) FindOne(conditions map[string]interface{}) (*Users, error) {
+func (u *Product) FindOne(conditions map[string]interface{}) (*Product, error) {
 	coll := u.Model()
 
 	conditions["is_delete"] = constant.UNDELETE
@@ -120,7 +124,7 @@ func (u *Users) FindOne(conditions map[string]interface{}) (*Users, error) {
 	return u, nil
 }
 
-func (u *Users) Insert() (interface{}, error) {
+func (u *Product) Insert() (interface{}, error) {
 	coll := u.Model()
 
 	resp, err := coll.InsertOne(context.TODO(), u)
@@ -131,10 +135,10 @@ func (u *Users) Insert() (interface{}, error) {
 	return resp, nil
 }
 
-func (u *Users) InsertMany(Users []interface{}) ([]interface{}, error) {
+func (u *Product) InsertMany(menu []interface{}) ([]interface{}, error) {
 	coll := u.Model()
 
-	resp, err := coll.InsertMany(context.TODO(), Users)
+	resp, err := coll.InsertMany(context.TODO(), menu)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +146,7 @@ func (u *Users) InsertMany(Users []interface{}) ([]interface{}, error) {
 	return resp.InsertedIDs, nil
 }
 
-func (u *Users) Update() (int64, error) {
+func (u *Product) Update() (int64, error) {
 	coll := u.Model()
 
 	condition := make(map[string]interface{})
@@ -160,7 +164,7 @@ func (u *Users) Update() (int64, error) {
 	return resp.ModifiedCount, nil
 }
 
-func (u *Users) UpdateByCondition(condition map[string]interface{}, data map[string]interface{}) (int64, error) {
+func (u *Product) UpdateByCondition(condition map[string]interface{}, data map[string]interface{}) (int64, error) {
 	coll := u.Model()
 
 	resp, err := coll.UpdateOne(context.TODO(), condition, data)
@@ -171,7 +175,7 @@ func (u *Users) UpdateByCondition(condition map[string]interface{}, data map[str
 	return resp.ModifiedCount, nil
 }
 
-func (u *Users) UpdateMany(conditions map[string]interface{}, updateData map[string]interface{}) (int64, error) {
+func (u *Product) UpdateMany(conditions map[string]interface{}, updateData map[string]interface{}) (int64, error) {
 	coll := u.Model()
 	resp, err := coll.UpdateMany(context.TODO(), conditions, updateData)
 	if err != nil {
@@ -181,7 +185,7 @@ func (u *Users) UpdateMany(conditions map[string]interface{}, updateData map[str
 	return resp.ModifiedCount, nil
 }
 
-func (u *Users) Count(ctx context.Context, condition map[string]interface{}) (int64, error) {
+func (u *Product) Count(ctx context.Context, condition map[string]interface{}) (int64, error) {
 	coll := u.Model()
 
 	condition["is_delete"] = constant.UNDELETE

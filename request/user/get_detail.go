@@ -5,9 +5,8 @@ type (
 		Uuid string `uri:"uuid"`
 	}
 	GetDetailResponse struct {
-		Uuid     string `json:"uuid" `
-		Name     string `json:"name"`
-		UserName string `json:"username"`
-		Email    string `json:"email"`
+		Name  string `json:"name"`
+		Image string `json:"image"`
+		Price int    `json:"price"`
 	}
 )

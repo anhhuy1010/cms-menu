@@ -115,7 +115,7 @@ type DetailResponse struct {
 	unknownFields protoimpl.UnknownFields
 
 	Uuid     string `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`
-	Username string `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Name string `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
 	IsActive int32  `protobuf:"varint,3,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 }
 
@@ -160,7 +160,7 @@ func (x *DetailResponse) GetUuid() string {
 
 func (x *DetailResponse) GetUsername() string {
 	if x != nil {
-		return x.Username
+		return x.Name
 	}
 	return ""
 }
