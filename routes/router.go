@@ -13,6 +13,7 @@ import (
 )
 
 func RouteInit(engine *gin.Engine) {
+	productCtr := new(controllers.ProductController)
 	userCtr := new(controllers.UserController)
 
 	engine.GET("/", func(c *gin.Context) {
@@ -30,13 +31,19 @@ func RouteInit(engine *gin.Engine) {
 	// apiV1.Use(middleware.VerifyAuth())
 	apiV1.Use(middleware.RequestLog())
 	{
+		apiV1.GET("/product", productCtr.List)
+		apiV1.POST("/product", productCtr.Create)
+		apiV1.GET("/product/:uuid", productCtr.Detail)
+		apiV1.PUT("/product/:uuid/updatestatus", productCtr.UpdateStatus)
+		apiV1.DELETE("/product/:uuid", productCtr.Delete)
+		apiV1.PUT("/product/:uuid", productCtr.Update)
+
 		apiV1.POST("/users", userCtr.Create)
 		apiV1.GET("/users", userCtr.List)
 		apiV1.GET("/users/:uuid", userCtr.Detail)
 		apiV1.PUT("/users/:uuid", userCtr.Update)
 		apiV1.PUT("/users/:uuid/update-status", userCtr.UpdateStatus)
 		apiV1.DELETE("/users/:uuid", userCtr.Delete)
-
 	}
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 

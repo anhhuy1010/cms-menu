@@ -18,18 +18,6 @@ import (
 type UserController struct {
 }
 
-// List
-// @Summary Get list users test ss
-// @Schemes
-// @Description Get list users
-// @Tags users
-// @Accept json
-// @Produce json
-// @Param request query request.GetListRequest true "query params"
-// @Success 200 {object} respond.PaginationResponse
-// @Router /users [get]
-
-// khởi tạo
 func (userCtl UserController) List(c *gin.Context) {
 	userModel := new(models.Users)
 	var req request.GetListRequest
