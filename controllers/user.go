@@ -23,27 +23,32 @@ func (userCtl UserController) List(c *gin.Context) {
 	var req request.GetListRequest
 
 	// kiểm tra đầu vào
-	err := c.ShouldBindWith(&req, binding.Query) // gán các tham số truy vấn từ yêu cầu HTTP vào biến reg sử dụng biding.query để chỉ định kiểu
-	if err != nil {                              // nếu có lỗi trong quá trình gán, trả về phản hồi http với mã trạng thái lỗi missing params
+	err := c.ShouldBindWith(&req, binding.Query)
+	if err != nil {
 		_ = c.Error(err)
 		c.JSON(http.StatusBadRequest, respond.MissingParams())
 		return
 	}
-	cond := bson.M{}         // khởi tạo một bản đồ "cond" để chứa các điều kiện truy vấn cho cơ sở dữ liệu
-	if req.Username != nil { // nếu trường user name khác rỗng
-		cond["username"] = req.Username // lấy username theo username
+	cond := bson.M{}
+	if req.Username != nil {
+		cond["username"] = req.Username
 	}
 
-	if req.IsActive != nil { // tương tự
+	if req.IsActive != nil {
 		cond["is_active"] = req.IsActive
 	}
 
-	optionsQuery, page, limit := models.GetPagingOption(req.Page, req.Limit, req.Sort) // lấy các tùy chọn phân trang từ yêu cầu, là hàm hỗ trợ lấy các giá trị này
-	var respData []request.ListResponse                                                //khởi tạo một slice tên là respData để chứa các phản hồi của danh sách người dùng
-	users, err := userModel.Pagination(c, cond, optionsQuery)                          // gọi phương thức Pagination của mô hình users để lấy danh sách người dùng dựa trewen các điều kiện
-	for _, user := range users {                                                       //duyệt qua từng người dùng trong danh sach users
+	optionsQuery, page, limit := models.GetPagingOption(req.Page, req.Limit, req.Sort)
+	var respData []request.ListResponse
+	users, err := userModel.Pagination(c, cond, optionsQuery)
+	if err != nil {
+		fmt.Println(err.Error())
+		c.JSON(http.StatusOK, respond.ErrorCommon("User no found!"))
+		return
+	}
+	for _, user := range users {
 
-		res := request.ListResponse{ // danh sách người dùng được trả về
+		res := request.ListResponse{
 			Uuid:       user.Uuid,
 			ClientUuid: user.ClientUuid,
 			Name:       user.Name,
@@ -53,15 +58,20 @@ func (userCtl UserController) List(c *gin.Context) {
 		respData = append(respData, res)
 	}
 	total, err := userModel.Count(c, cond)
+	if err != nil {
+		fmt.Println(err.Error())
+		c.JSON(http.StatusOK, respond.ErrorCommon("User no found!"))
+		return
+	}
 	pages := int(math.Ceil(float64(total) / float64(limit)))
 	c.JSON(http.StatusOK, respond.SuccessPagination(respData, page, limit, pages, total))
 }
 
 func (userCtl UserController) Detail(c *gin.Context) {
 	userModel := new(models.Users)
-	var reqUri request.GetDetailUri //khai báo một biến dẫn đến hàm request/user
+	var reqUri request.GetDetailUri
 	// Validation input
-	err := c.ShouldBindUri(&reqUri) // hàm dùng để tìm đến đường dẫn uri
+	err := c.ShouldBindUri(&reqUri)
 	if err != nil {
 		_ = c.Error(err)
 		c.JSON(http.StatusBadRequest, respond.MissingParams())
@@ -88,16 +98,16 @@ func (userCtl UserController) Detail(c *gin.Context) {
 
 // khởi tạo
 func (userCtl UserController) Update(c *gin.Context) {
-	userModel := new(models.Users) // tạo một model mới
-	var reqUri request.UpdateUri   //tạo biến đưa tới hàm updateuri ở model
+	userModel := new(models.Users)
+	var reqUri request.UpdateUri
 	// kiểm tra đầu vào
-	err := c.ShouldBindUri(&reqUri) //dùng framwork của gin dẫn đến cái đường dẫn Uri
-	if err != nil {                 //câu điều kiện kiểm tra xem việc ràng buộc dữ liệu từ phần đường dẫn có thành công hay không
+	err := c.ShouldBindUri(&reqUri)
+	if err != nil {
 		_ = c.Error(err)
 		c.JSON(http.StatusBadRequest, respond.MissingParams())
 		return
 	}
-	var req request.UpdateRequest // câu điều kiện kiểm tra việc ràng buộc dữ liệu file json có thành công hay không
+	var req request.UpdateRequest
 	err = c.ShouldBindJSON(&req)
 	if err != nil {
 		_ = c.Error(err)
@@ -105,8 +115,8 @@ func (userCtl UserController) Update(c *gin.Context) {
 		return
 	}
 
-	condition := bson.M{"uuid": reqUri.Uuid}  // kiểm tra đường dẫn đến uuid
-	user, err := userModel.FindOne(condition) // tìm đến uuid
+	condition := bson.M{"uuid": reqUri.Uuid}
+	user, err := userModel.FindOne(condition)
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusOK, respond.ErrorCommon("User no found!"))
@@ -203,15 +213,7 @@ func (userCtl UserController) UpdateStatus(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, respond.Success(user.Uuid, "update successfully"))
 }
-func (userCtl UserController) Create(c *gin.Context) { // tạo một user mới
-	// var reqI request.GetInsertRequest
-	// // kiểm tra đầu vào
-	// err := c.ShouldBindWith(&reqI, binding.Query)
-	// if err != nil {
-	// 	_ = c.Error(err)
-	// 	c.JSON(http.StatusBadRequest, respond.MissingParams())
-	// 	return
-	// }
+func (userCtl UserController) Create(c *gin.Context) {
 	var req request.GetInsertRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {

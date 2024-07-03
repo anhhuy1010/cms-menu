@@ -27,7 +27,7 @@ type Products struct {
 	IsActive    int       `json:"is_active" bson:"is_active"`
 	IsDelete    int       `json:"is_delete" bson:"is_delete"`
 	StartDate   time.Time `json:"start_date" bson:"start_date"`
-	EndDate     time.Time `json:"end_date" bson:"end_date  "`
+	EndDate     time.Time `json:"end_date" bson:"end_date"`
 	CreatedAt   time.Time `json:"created_at" bson:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at" bson:"updated_at"`
 }
