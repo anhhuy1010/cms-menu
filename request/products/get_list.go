@@ -14,7 +14,7 @@ type (
 		MinQuantity *int       `form:"min_quantity"`
 		MaxQuantity *int       `form:"max_quantity"`
 		Date        *time.Time `form:"date"`
-		Price       int        `form:"prices"`
+		Price       int        `form:"price"`
 	}
 	ListResponse struct {
 		Uuid      string    `json:"uuid" `
