@@ -10,10 +10,11 @@ type (
 		Limit       int        `form:"limit"`
 		Sort        string     `form:"sort"`
 		IsActive    *int       `form:"is_active" `
-		Sequence    int        `form:"sequence"`
+		Sequence    *int       `form:"sequence"`
 		MinQuantity *int       `form:"min_quantity"`
 		MaxQuantity *int       `form:"max_quantity"`
 		Date        *time.Time `form:"date"`
+		Price       int        `form:"price"`
 	}
 	ListResponse struct {
 		Uuid      string    `json:"uuid" `
