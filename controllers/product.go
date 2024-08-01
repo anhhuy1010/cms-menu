@@ -8,11 +8,12 @@ import (
 	"github.com/anhhuy1010/cms-menu/constant"
 	"github.com/anhhuy1010/cms-menu/helpers/respond"
 	"github.com/anhhuy1010/cms-menu/helpers/util"
-
 	"github.com/anhhuy1010/cms-menu/models"
 	request "github.com/anhhuy1010/cms-menu/request/products"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -64,6 +65,7 @@ func (productClt ProductController) List(c *gin.Context) {
 			StartDate: productt.StartDate,
 			EndDate:   productt.EndDate,
 			Quantity:  productt.Quantity,
+			IsDelete:  productt.IsDelete,
 		}
 		respData = append(respData, res)
 	}
@@ -93,7 +95,7 @@ func (productClt ProductController) Detail(c *gin.Context) {
 	productt, err := productModel.FindOne(condition)
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.ErrorCommon("Product no found!"))
+		c.JSON(http.StatusBadRequest, respond.ErrorCommon("Product no found!"))
 		return
 	}
 
@@ -125,9 +127,9 @@ func (productClt ProductController) UpdateStatus(c *gin.Context) {
 		return
 	}
 	var req request.UpdateRequest
-	err = c.ShouldBindJSON(&req)
+	err = c.ShouldBindWith(&req, binding.JSON)
 	if err != nil {
-		_ = c.Error(err)
+		logrus.Error(err)
 		c.JSON(http.StatusBadRequest, respond.MissingParams())
 		return
 	}
@@ -136,7 +138,7 @@ func (productClt ProductController) UpdateStatus(c *gin.Context) {
 	productt, err := productModel.FindOne(condition)
 	if err != nil {
 		_ = c.Error(err)
-		c.JSON(http.StatusOK, respond.ErrorCommon("Product no found!"))
+		c.JSON(http.StatusBadRequest, respond.ErrorCommon("Product no found!"))
 		return
 	}
 	productt.IsActive = *req.IsActive

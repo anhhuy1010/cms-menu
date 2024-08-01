@@ -16,11 +16,14 @@ require (
 	google.golang.org/protobuf v1.34.1
 )
 
+require github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/anhhuy1010/cms-order v0.0.0-20240524035823-20ee152cbff0
+	github.com/anhhuy1010/cms-user v0.0.0-20240731100305-95cf5eeda9d4
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect

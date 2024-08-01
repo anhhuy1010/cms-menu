@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -151,6 +152,7 @@ func (u *Users) Update() (int64, error) {
 	u.UpdatedAt = util.GetNowUTC()
 	updateStr := make(map[string]interface{})
 	updateStr["$set"] = u
+	fmt.Println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", updateStr)
 
 	resp, err := coll.UpdateOne(context.TODO(), condition, updateStr)
 	if err != nil {

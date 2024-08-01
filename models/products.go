@@ -2,6 +2,8 @@ package models
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -154,8 +156,10 @@ func (u *Products) Update() (int64, error) {
 	u.UpdatedAt = util.GetNowUTC()
 	updateStr := make(map[string]interface{})
 	updateStr["$set"] = u
-
+	jsonString, err := json.Marshal(updateStr)
+	fmt.Println(string(jsonString))
 	resp, err := coll.UpdateOne(context.TODO(), condition, updateStr)
+	fmt.Println(condition)
 	if err != nil {
 		return 0, err
 	}
