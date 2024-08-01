@@ -29,7 +29,7 @@ func RouteInit(engine *gin.Engine) {
 
 	// apiV1.Use(middleware.ValidateHeader())
 	// apiV1.Use(middleware.VerifyAuth())
-	apiV1.Use(controllers.RoleMiddleware())
+	apiV1.Use(middleware.RoleMiddleware())
 	apiV1.Use(middleware.RequestLog())
 
 	{
