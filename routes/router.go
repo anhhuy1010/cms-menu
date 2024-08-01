@@ -22,14 +22,16 @@ func RouteInit(engine *gin.Engine) {
 	engine.GET("/health", func(c *gin.Context) {
 		c.String(http.StatusOK, "OK")
 	})
-
 	engine.Use(middleware.Recovery())
+	engine.Use(middleware.CORSMiddleware())
 	docs.SwaggerInfo.BasePath = "/v1"
 	apiV1 := engine.Group("/v1")
 
-	//apiV1.Use(middleware.ValidateHeader())
+	// apiV1.Use(middleware.ValidateHeader())
 	// apiV1.Use(middleware.VerifyAuth())
+	apiV1.Use(controllers.RoleMiddleware())
 	apiV1.Use(middleware.RequestLog())
+
 	{
 		apiV1.GET("/product", productCtr.List)
 		apiV1.POST("/product", productCtr.Create)

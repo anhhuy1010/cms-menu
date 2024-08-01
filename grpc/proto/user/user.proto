@@ -9,15 +9,10 @@ service User {
 }
 
 message ListRequest {
+  string token = 1;
 }
 
 message ListResponse {
-  repeated DetailResponse users = 1;
+  string userUuid = 1;
+  string role = 2;
 }
-
-message DetailResponse {
-  string uuid = 1;
-  string username = 2;
-  int32 is_active = 3;
-}
-
