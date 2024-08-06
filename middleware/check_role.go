@@ -45,7 +45,6 @@ func RoleMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
 		c.Set("userRole", resp.Role)
 		c.Set("userUuid", resp.UserUuid)
 

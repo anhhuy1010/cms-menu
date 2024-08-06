@@ -43,7 +43,7 @@ func (userCtl UserController) List(c *gin.Context) {
 	users, err := userModel.Pagination(c, cond, optionsQuery)
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.ErrorCommon("User no found!"))
+		c.JSON(http.StatusBadRequest, respond.ErrorCommon("User no found!"))
 		return
 	}
 	for _, user := range users {
@@ -60,7 +60,7 @@ func (userCtl UserController) List(c *gin.Context) {
 	total, err := userModel.Count(c, cond)
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.ErrorCommon("User no found!"))
+		c.JSON(http.StatusBadRequest, respond.ErrorCommon("User no found!"))
 		return
 	}
 	pages := int(math.Ceil(float64(total) / float64(limit)))
@@ -82,7 +82,7 @@ func (userCtl UserController) Detail(c *gin.Context) {
 	user, err := userModel.FindOne(condition)
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.ErrorCommon("User no found!"))
+		c.JSON(http.StatusBadRequest, respond.ErrorCommon("User no found!"))
 		return
 	}
 
@@ -119,7 +119,7 @@ func (userCtl UserController) Update(c *gin.Context) {
 	user, err := userModel.FindOne(condition)
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.ErrorCommon("User no found!"))
+		c.JSON(http.StatusBadRequest, respond.ErrorCommon("User no found!"))
 		return
 	}
 
@@ -136,7 +136,7 @@ func (userCtl UserController) Update(c *gin.Context) {
 	_, err = user.Update()
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.UpdatedFail())
+		c.JSON(http.StatusBadRequest, respond.UpdatedFail())
 		return
 	}
 	c.JSON(http.StatusOK, respond.Success(user.Uuid, "update successfully"))
@@ -157,7 +157,7 @@ func (userCtl UserController) Delete(c *gin.Context) {
 	user, err := userModel.FindOne(condition)
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.ErrorCommon("User no found!"))
+		c.JSON(http.StatusBadRequest, respond.ErrorCommon("User no found!"))
 		return
 	}
 
@@ -166,7 +166,7 @@ func (userCtl UserController) Delete(c *gin.Context) {
 	_, err = user.Update()
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.UpdatedFail())
+		c.JSON(http.StatusBadRequest, respond.UpdatedFail())
 		return
 	}
 	c.JSON(http.StatusOK, respond.Success(user.Uuid, "Delete successfully"))
@@ -199,7 +199,7 @@ func (userCtl UserController) UpdateStatus(c *gin.Context) {
 	user, err := userModel.FindOne(condition)
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.ErrorCommon("User no found!"))
+		c.JSON(http.StatusBadRequest, respond.ErrorCommon("User no found!"))
 		return
 	}
 
@@ -208,7 +208,7 @@ func (userCtl UserController) UpdateStatus(c *gin.Context) {
 	_, err = user.Update()
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.UpdatedFail())
+		c.JSON(http.StatusBadRequest, respond.UpdatedFail())
 		return
 	}
 	c.JSON(http.StatusOK, respond.Success(user.Uuid, "update successfully"))
@@ -229,7 +229,7 @@ func (userCtl UserController) Create(c *gin.Context) {
 	_, err = userData.Insert()
 	if err != nil {
 		fmt.Println(err.Error())
-		c.JSON(http.StatusOK, respond.UpdatedFail())
+		c.JSON(http.StatusBadRequest, respond.UpdatedFail())
 		return
 	}
 	c.JSON(http.StatusOK, respond.Success(userData.Uuid, "update successfully"))
